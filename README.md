@@ -94,10 +94,11 @@ For each lock:
 
 Add to `configuration.yaml`:
 
-```yaml
+```
 logger:
   logs:
-    custom_components.philips_home_access: debug```
+    custom_components.philips_home_access: debug
+```
 
 ## Support
 
