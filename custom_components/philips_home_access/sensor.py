@@ -26,19 +26,22 @@ async def async_setup_entry(hass, entry, async_add_entities):
             _LOGGER.debug("sensor: skipping device without wifiSN: %s", d)
             continue
 
-        name = d.get("lockNickname") or "Philips Home Access Lock"
+        name = d.get("lockNickname") or "Philips Home Access Device"
+        device_type = d.get("deviceType")
 
-        # Use dict for device_info (HA-native)
         device_info = {
             "identifiers": {(DOMAIN, esn)},
             "name": name,
             "manufacturer": "Philips",
-            "model": d.get("productModel", "Philips Home Access Lock"),
-            "sw_version": d.get("lockSoftwareVersion"),
+            "model": d.get("productModel", "Philips Home Access Device"),
+            "sw_version": d.get("lockSoftwareVersion") or d.get("wifiVersion") or d.get("gatewayVersion"),
         }
 
-        entities.append(PhilipsBatterySensor(api, esn, name, device_info))
-        entities.append(PhilipsSignalSensor(api, esn, name, device_info))
+        if device_type == "LOCK":
+            entities.append(PhilipsBatterySensor(api, esn, name, device_info))
+            entities.append(PhilipsSignalSensor(api, esn, name, device_info))
+        elif device_type == "GATEWAY":
+            entities.append(PhilipsSignalSensor(api, esn, name, device_info))
 
     _LOGGER.debug("sensor: adding %d entities", len(entities))
     async_add_entities(entities, update_before_add=True)
