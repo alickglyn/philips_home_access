@@ -18,8 +18,9 @@ This integration allows you to monitor and control Philips Home Access locks dir
 So far, I have only tested with:
 
 - Philips Home Access WiFi Locks
+  - This also includes locks that are controlled through a wifi gateway
 
-Other Philips locks using a direct wifi connection may also work. Let me know if your lock works or help me add support it.
+Let me know if your lock works or help me add support it.
 
 ## Notes
 
@@ -80,6 +81,11 @@ For each lock:
 - Auto-Lock toggle
 - Auto-Lock delay (10s-180s)
 
+
+For each gateway:
+
+- WiFi signal strength sensor
+
 ---
 
 ## Known Limitations
@@ -94,10 +100,11 @@ For each lock:
 
 Add to `configuration.yaml`:
 
-```yaml
+```
 logger:
   logs:
-    custom_components.philips_home_access: debug```
+    custom_components.philips_home_access: debug
+```
 
 ## Support
 
