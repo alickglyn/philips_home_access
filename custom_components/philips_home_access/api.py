@@ -35,7 +35,10 @@ class PhilipsHomeAccessAPI:
     def _normalize_mac(self, mac: str) -> str:
         if not mac:
             return ""
-        return str(mac).replace(" ", "").upper()
+        cleaned = str(mac).replace(" ", "").replace(":", "").replace("-", "").upper()
+        if len(cleaned) != 12:
+            return cleaned
+        return ":".join(cleaned[i:i+2] for i in range(0, 12, 2))
 
     def _get_lock_transport_info(self, lock_esn):
         """Return transport details for a lock.
@@ -313,9 +316,9 @@ class PhilipsHomeAccessAPI:
         if transport["mode"] == "gateway":
             url = f"https://api.idlespacetech.com/v3/gateway/set-lock-{'close' if lock_it else 'open'}"
             payload_to_sign = {
-                "esn": transport["gateway"]["wifiSN"],   # bridge serial
+                "esn": transport["lock"]["wifiSN"],
                 "mac": self._normalize_mac(transport["lock"].get("mac", "")),
-                "masterSn": transport["lock"]["wifiSN"], # lock serial
+                "masterSn": transport["gateway"]["wifiSN"],
                 "userNumberId": 0,
                 "reqTime": str(current_time_ms),
             }
@@ -334,6 +337,11 @@ class PhilipsHomeAccessAPI:
         payload_to_sign["sign"] = base64.b64encode(pkcs1_15.new(key).sign(h)).decode()
 
         final_json = json.dumps(payload_to_sign, separators=(",", ":")).encode()
+
+        _LOGGER.debug(
+            "payload: %s",
+            final_json
+        )
 
         encrypt_key = RSA.import_key(binascii.unhexlify(RSA_HEX_KEY))
         cipher = PKCS1_v1_5.new(encrypt_key)
