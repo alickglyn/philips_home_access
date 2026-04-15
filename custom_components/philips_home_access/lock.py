@@ -53,13 +53,17 @@ class PhilipsHomeAccessLock(LockEntity):
         self.async_write_ha_state()
 
     async def async_unlock(self, **kwargs):
-        _LOGGER.warning("lock: unlock requested for esn=%s", self._esn)
-        self._skip_poll_until = datetime.utcnow() + timedelta(seconds=30)
-        resp = await self.hass.async_add_executor_job(self._api.set_lock_state, self._esn, False)
-        _LOGGER.warning("lock: unlock response for esn=%s: %s", self._esn, resp)
-        if isinstance(resp, dict) and resp.get("code") == 200:
-            self._attr_is_locked = False
-        self.async_write_ha_state()
+        """Unlock the device."""
+        _LOGGER.warning("已屏蔽来自 Home Assistant 的开锁请求: %s", self._name)
+        return  # 直接返回，不执行任何 API 调用
+        
+        # _LOGGER.warning("lock: unlock requested for esn=%s", self._esn)
+        # self._skip_poll_until = datetime.utcnow() + timedelta(seconds=30)
+        # resp = await self.hass.async_add_executor_job(self._api.set_lock_state, self._esn, False)
+        # _LOGGER.warning("lock: unlock response for esn=%s: %s", self._esn, resp)
+        # if isinstance(resp, dict) and resp.get("code") == 200:
+        #    self._attr_is_locked = False
+        # self.async_write_ha_state()
 
     async def async_update(self):
         if self._skip_poll_until and datetime.utcnow() < self._skip_poll_until:
