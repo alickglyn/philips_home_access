@@ -1,5 +1,5 @@
 import logging
-from homeassistant.components.lock import LockEntity
+from homeassistant.components.lock import LockEntity, LockEntityFeature
 from homeassistant.helpers.device_registry import DeviceInfo
 from .const import DOMAIN
 from datetime import datetime, timedelta
