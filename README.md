@@ -105,7 +105,10 @@ logger:
   logs:
     custom_components.philips_home_access: debug
 ```
+## 备注
+此分支为自用分支，主要改动是移除了远程解锁的权限，仅对HA做状态通知。
 
+```
 ## Support
 
 If this integration helped you, consider supporting development:
