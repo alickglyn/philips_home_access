@@ -17,6 +17,7 @@ class PhilipsHomeAccessLock(LockEntity):
     _attr_should_poll = True
     _attr_scan_interval = timedelta(minutes=1)
     _attr_icon = "mdi:lock-smart"
+    _attr_supported_features = LockEntityFeature.LOCK
     def __init__(self, api, device_data):
         self._skip_poll_until = None
         self._api = api
