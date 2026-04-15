@@ -109,8 +109,7 @@ logger:
 此分支为自用分支，主要改动是移除了远程解锁的权限，仅对HA做状态通知。
 技术问题请移步主分支。
 
-```
-```
+
 ## Support
 
 If this integration helped you, consider supporting development:
