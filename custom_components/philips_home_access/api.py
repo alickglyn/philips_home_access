@@ -7,7 +7,14 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-from .const import RSA_HEX_KEY, RSA_PRIVATE_SIGN
+from .const import (
+    RSA_HEX_KEY,
+    RSA_PRIVATE_SIGN,
+    API_BASE_MAP,
+    LOGIN_BASE_MAP,
+    DEFAULT_LOGIN_BASE,
+    DEFAULT_API_BASE,
+)
 
 
 class PhilipsHomeAccessAPI:
@@ -17,6 +24,16 @@ class PhilipsHomeAccessAPI:
         self.region_code = region_code
         self.token = None
         self.uid = None
+        # --- 新增：根据区域选择 API 基地址 ---
+        self.login_base = LOGIN_BASE_MAP.get(region_code, DEFAULT_LOGIN_BASE)
+        self.api_base = API_BASE_MAP.get(region_code, DEFAULT_API_BASE)
+        _LOGGER.debug(
+            "API initialized for region=%s, login_base=%s, api_base=%s",
+            region_code,
+            self.login_base,
+            self.api_base,
+        )
+        # --- 新增结束 ---
 
     def _mask(self, value, keep=4):
         if not value:
@@ -75,7 +92,7 @@ class PhilipsHomeAccessAPI:
         }
 
     def login(self):
-        url = "https://user-oneness.juziwulian.com/homeaccess/oauth/login"
+        url = f"{self.login_base}/homeaccess/oauth/login"
         headers = {
             "reqSource": "app",
             "lang": "en_US",
@@ -135,7 +152,7 @@ class PhilipsHomeAccessAPI:
         raise Exception("region_not_found")
 
     def get_devices(self):
-        url = "https://api.idlespacetech.com/homeaccess/device/list"
+        url = f"{self.api_base}/homeaccess/device/list"
         headers = {
             "token": self.token,
             "reqSource": "app",
@@ -170,7 +187,7 @@ class PhilipsHomeAccessAPI:
         from Crypto.Hash import SHA256
         from Crypto.Signature import pkcs1_15
 
-        url = "https://api.idlespacetech.com/v4/device/query-device-attr"
+        url = f"{self.api_base}/v4/device/query-device-attr"
         current_time_ms = int(time.time() * 1000)
 
         headers = {
@@ -239,7 +256,7 @@ class PhilipsHomeAccessAPI:
         return base64.b64encode(pkcs1_15.new(key).sign(h)).decode()
 
     def set_auto_lock_mode(self, esn, enabled):
-        url = "https://api.idlespacetech.com/v3/api/device/set-am-mode"
+        url = f"{self.api_base}/v3/api/device/set-am-mode"
         mode = 0 if enabled else 1
 
         payload = {
@@ -263,7 +280,7 @@ class PhilipsHomeAccessAPI:
         return out
 
     def set_auto_lock_time(self, esn, seconds):
-        url = "https://api.idlespacetech.com/v3/api/device/set-auto-lock-time"
+        url = f"{self.api_base}/v3/api/device/set-auto-lock-time"
 
         payload = {
             "esn": esn,
@@ -314,7 +331,7 @@ class PhilipsHomeAccessAPI:
         }
 
         if transport["mode"] == "gateway":
-            url = f"https://api.idlespacetech.com/v3/gateway/set-lock-{'close' if lock_it else 'open'}"
+            url = f"{self.api_base}/v3/gateway/set-lock-{'close' if lock_it else 'open'}"
             payload_to_sign = {
                 "esn": transport["lock"]["wifiSN"],
                 "mac": self._normalize_mac(transport["lock"].get("mac", "")),
@@ -323,7 +340,7 @@ class PhilipsHomeAccessAPI:
                 "reqTime": str(current_time_ms),
             }
         else:
-            url = f"https://api.idlespacetech.com/v3/device/{'close' if lock_it else 'open'}-device"
+            url = f"{self.api_base}/v3/device/{'close' if lock_it else 'open'}-device"
             payload_to_sign = {
                 "esn": esn,
                 "userNumberId": 0,
